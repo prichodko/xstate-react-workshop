@@ -1,20 +1,16 @@
-import * as React from 'react';
-import { faPlay, faPause } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import * as React from 'react'
+import { faPlay, faPause } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-import { useMachine } from '@xstate/react';
-import { timerMachine } from './timerMachine';
-import { ProgressCircle } from '../ProgressCircle';
+import { useMachine } from '@xstate/react'
+import { timerMachine } from './timerMachine'
+import { ProgressCircle } from '../ProgressCircle'
 
 export const Timer = () => {
-  const [state, send] = useMachine(timerMachine);
+  const [state, send] = useMachine(timerMachine)
 
   // Use state.context instead
-  const { duration, elapsed, interval } = {
-    duration: 60,
-    elapsed: 0,
-    interval: 0.1,
-  };
+  const { duration, elapsed, interval } = state.context
 
   return (
     <div
@@ -41,13 +37,15 @@ export const Timer = () => {
             <button onClick={() => send('RESET')}>Reset</button>
           )}
 
-          <button
-            onClick={() => {
-              // ...
-            }}
-          >
-            + 1:00
-          </button>
+          {state.matches('running') && (
+            <button
+              onClick={() => {
+                send({ type: 'ADD_MINUTE' })
+              }}
+            >
+              + 1:00
+            </button>
+          )}
         </div>
       </div>
       <div className="actions">
@@ -64,5 +62,5 @@ export const Timer = () => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}
