@@ -1,20 +1,27 @@
-import * as React from 'react';
-import { useEffect } from 'react';
-import { faPlay, faPause } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import * as React from 'react'
+import { useEffect } from 'react'
+import { faPlay, faPause } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-import { useMachine } from '@xstate/react';
-import { ProgressCircle } from '../ProgressCircle';
+import { useMachine } from '@xstate/react'
+import { ProgressCircle } from '../ProgressCircle'
 
-import { timerMachine } from './timerMachine';
+import { timerMachine } from './timerMachine'
 
 export const Timer = () => {
-  const [state, send] = useMachine(timerMachine);
+  const [state, send] = useMachine(timerMachine)
 
-  const { duration, elapsed, interval } = state.context;
+  const { duration, elapsed, interval } = state.context
 
-  // Add a useEffect(...) here to send a TICK event on every `interval`
-  // ...
+  useEffect(() => {
+    if (state.matches('running')) {
+      const intervalId = setInterval(() => {
+        send('TICK')
+      }, interval * 1000)
+
+      return () => clearInterval(intervalId)
+    }
+  }, [state, interval, send])
 
   return (
     <div
@@ -60,5 +67,5 @@ export const Timer = () => {
         )}
       </div>
     </div>
-  );
-};
+  )
+}

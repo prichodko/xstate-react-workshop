@@ -1,48 +1,56 @@
-import { createMachine, assign } from 'xstate';
+import { createMachine, assign } from 'xstate'
 
-// Parameterize the assign actions here:
-// const tick = ...
-// const addMinute = ...
-// const reset = ...
+const initialContext = {
+  duration: 60,
+  elapsed: 0,
+  interval: 0.1,
+}
 
-export const timerMachine = createMachine({
-  initial: 'idle',
-  context: {
-    duration: 60,
-    elapsed: 0,
-    interval: 0.1,
-  },
-  states: {
-    idle: {
-      // Parameterize this action:
-      entry: assign({
-        duration: 60,
-        elapsed: 0,
-      }),
+const tick = assign({
+  elapsed: (ctx) => ctx.elapsed + ctx.interval,
+})
+const addMinute = assign({
+  duration: (ctx) => ctx.duration + 60,
+})
+const reset = assign(initialContext)
 
-      on: {
-        TOGGLE: 'running',
+export const timerMachine = createMachine(
+  {
+    initial: 'idle',
+    context: initialContext,
+    states: {
+      idle: {
+        entry: ['reset'],
+        on: {
+          TOGGLE: 'running',
+        },
       },
-    },
-    running: {
-      on: {
-        // On the TICK event, the context.elapsed should be incremented by context.interval
-        // ...
-
-        TOGGLE: 'paused',
-        ADD_MINUTE: {
-          // Parameterize this action:
-          actions: assign({
-            duration: (ctx) => ctx.duration + 60,
-          }),
+      running: {
+        on: {
+          TICK: {
+            actions: ['tick'],
+          },
+          TOGGLE: 'paused',
+          ADD_MINUTE: {
+            actions: ['addMinute'],
+          },
+        },
+      },
+      paused: {
+        on: {
+          TOGGLE: 'running',
+          RESET: {
+            target: 'idle',
+          },
         },
       },
     },
-    paused: {
-      on: {
-        TOGGLE: 'running',
-        RESET: 'idle',
-      },
-    },
   },
-});
+  {
+    actions: {
+      tick,
+      addMinute,
+      reset,
+    },
+  }
+)
